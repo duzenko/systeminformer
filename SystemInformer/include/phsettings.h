@@ -515,6 +515,7 @@ EXT ULONG PhCsProcessMonitorCacheLimit;
 #define SETTING_SYSINFO_WINDOW_SCROLL_ENABLED                       L"SysInfoScrollEnabled"
 #define SETTING_SYSINFO_SHOW_CPU_SPEED_MHZ                          L"SysInfoShowCpuSpeedMhz"
 #define SETTING_SYSINFO_SHOW_CPU_SPEED_PER_CPU                      L"SysInfoShowCpuSpeedPerCpu"
+#define SETTING_ENABLE_CPU_FREQUENCY_MSR                            L"EnableCpuFrequencyMsr"
 #define SETTING_SYSINFO_WINDOW_ALWAYS_ON_TOP                        L"SysInfoWindowAlwaysOnTop"
 #define SETTING_SYSINFO_WINDOW_ONE_GRAPH_PER_CPU                    L"SysInfoWindowOneGraphPerCpu"
 #define SETTING_SYSINFO_WINDOW_POSITION                             L"SysInfoWindowPosition"

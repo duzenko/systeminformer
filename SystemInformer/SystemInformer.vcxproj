@@ -333,6 +333,7 @@
         <ClCompile Include="srvprv.c" />
         <ClCompile Include="sessmsg.c" />
         <ClCompile Include="sysinfo.c" />
+        <ClCompile Include="cpufreqmsr.c" />
         <ClCompile Include="syssccpu.c" />
         <ClCompile Include="sysscio.c" />
         <ClCompile Include="sysscmem.c" />
@@ -348,6 +349,7 @@
         <ClInclude Include="include\actions.h" />
         <ClInclude Include="include\appsup.h" />
         <ClInclude Include="include\colmgr.h" />
+        <ClInclude Include="include\cpufreqmsr.h" />
         <ClInclude Include="include\colsetmgr.h" />
         <ClInclude Include="include\devprv.h" />
         <ClInclude Include="include\extmgr.h" />
