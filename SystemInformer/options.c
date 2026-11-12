@@ -4517,6 +4517,7 @@ INT_PTR CALLBACK PhpOptionsGraphsDlgProc(
             SetDlgItemCheckForSetting(hwndDlg, IDC_SHOWTEXT, SETTING_GRAPH_SHOW_TEXT);
             SetDlgItemCheckForSetting(hwndDlg, IDC_TASKMANAGERSTYLE, SETTING_GRAPH_TASK_MANAGER_STYLE);
             SetDlgItemCheckForSetting(hwndDlg, IDC_SHOWCOMMITINSUMMARY, SETTING_SHOW_COMMIT_IN_SUMMARY);
+            SetDlgItemCheckForSetting(hwndDlg, IDC_ENABLECPUFREQMSR, SETTING_ENABLE_CPU_FREQUENCY_MSR);
 
             // Graph mode: smooth drawing and old colors are independent.
             Button_SetCheck(GetDlgItem(hwndDlg, IDC_ENABLESMOOTHGRAPHS), PH_GRAPH_MODE_IS_SMOOTH(PhCsGraphColorMode) ? BST_CHECKED : BST_UNCHECKED);
@@ -4548,6 +4549,7 @@ INT_PTR CALLBACK PhpOptionsGraphsDlgProc(
             SetSettingForDlgItemCheck(hwndDlg, IDC_SHOWTEXT, SETTING_GRAPH_SHOW_TEXT);
             SetSettingForDlgItemCheck(hwndDlg, IDC_TASKMANAGERSTYLE, SETTING_GRAPH_TASK_MANAGER_STYLE);
             SetSettingForDlgItemCheck(hwndDlg, IDC_SHOWCOMMITINSUMMARY, SETTING_SHOW_COMMIT_IN_SUMMARY);
+            SetSettingForDlgItemCheck(hwndDlg, IDC_ENABLECPUFREQMSR, SETTING_ENABLE_CPU_FREQUENCY_MSR);
 
             {
                 BOOLEAN smooth = Button_GetCheck(GetDlgItem(hwndDlg, IDC_ENABLESMOOTHGRAPHS)) == BST_CHECKED;
@@ -4586,6 +4588,45 @@ INT_PTR CALLBACK PhpOptionsGraphsDlgProc(
             {
             case IDC_USEOLDCOLORS:
                 EnableWindow(GetDlgItem(hwndDlg, IDC_TASKMANAGERSTYLE), Button_GetCheck(GET_WM_COMMAND_HWND(wParam, lParam)) != BST_CHECKED);
+                break;
+            case IDC_ENABLECPUFREQMSR:
+                {
+                    // Reading MSRs through PawnIO needs an elevated client; offer to restart as
+                    // administrator the same way the rest of the app does.
+                    if (Button_GetCheck(GET_WM_COMMAND_HWND(wParam, lParam)) == BST_CHECKED &&
+                        !PhGetOwnTokenAttributes().Elevated)
+                    {
+                        if (PhShowMessage2(
+                            hwndDlg,
+                            TD_YES_BUTTON | TD_NO_BUTTON,
+                            TD_INFORMATION_ICON,
+                            L"Reading the true CPU frequency from MSRs requires administrator rights.",
+                            L"Do you want to restart System Informer as administrator now?"
+                            ) == IDYES)
+                        {
+                            PhSetIntegerSetting(SETTING_ENABLE_CPU_FREQUENCY_MSR, TRUE);
+                            SystemInformer_SaveAllSettings();
+                            SystemInformer_PrepareForEarlyShutdown();
+
+                            if (NT_SUCCESS(PhShellProcessHacker(
+                                hwndDlg,
+                                L"-v -newinstance",
+                                SW_SHOW,
+                                PH_SHELL_EXECUTE_ADMIN,
+                                PH_SHELL_APP_PROPAGATE_PARAMETERS | PH_SHELL_APP_PROPAGATE_PARAMETERS_IGNORE_VISIBILITY,
+                                0,
+                                NULL
+                                )))
+                            {
+                                SystemInformer_Destroy();
+                            }
+                            else
+                            {
+                                SystemInformer_CancelEarlyShutdown();
+                            }
+                        }
+                    }
+                }
                 break;
             }
         }

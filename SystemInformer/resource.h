@@ -87,6 +87,7 @@
 #define IDD_SYSINFO_CPUPANEL            197
 #define IDD_SYSINFO_MEMPANEL            198
 #define IDR_SYSINFO_ACCEL               198
+#define IDR_INTELMSR                    299
 #define IDD_SYSINFO_MEM                 199
 #define IDD_SYSINFO_IO                  200
 #define IDD_SYSINFO_IOPANEL             201
@@ -266,6 +267,7 @@
 #define IDC_RENAME                      1080
 #define IDC_VIEWPARENTPROCESS           1081
 #define IDC_VIEWPARENTCONSOLE           1543
+#define IDC_ENABLECPUFREQMSR            1544
 #define IDC_OPENFILENAME                1082
 #define IDC_LIMITS                      1083
 #define IDC_OPENFILENAME2               1083
@@ -1038,7 +1040,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        299
+#define _APS_NEXT_RESOURCE_VALUE        300
 #define _APS_NEXT_COMMAND_VALUE         10355
 #define _APS_NEXT_CONTROL_VALUE         1572
 #define _APS_NEXT_SYMED_VALUE           170

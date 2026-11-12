@@ -19,6 +19,7 @@
 #include <phfirmware.h>
 #include <phintrin.h>
 #include <devguid.h>
+#include <cpufreqmsr.h>
 
 static PPH_SYSINFO_SECTION CpuSection;
 static HWND CpuDialog;
@@ -38,6 +39,7 @@ static ULONG NumberOfProcessors;
 static FLOAT CpuTimerResolution;
 static PFLOAT CpuFrequencyInformation;
 static FLOAT CpuCurrentFrequency;
+static BOOLEAN CpuMsrFrequencyEnabled;
 static PSYSTEM_INTERRUPT_INFORMATION InterruptInformation;
 static PPROCESSOR_POWER_INFORMATION PowerInformation;
 static PSYSTEM_PROCESSOR_PERFORMANCE_DISTRIBUTION CurrentPerformanceDistribution;
@@ -267,6 +269,11 @@ VOID PhSipInitializeCpuDialog(
     CpuTicked = 0;
     CpuMaxMhz = 0;
 
+    CpuMsrFrequencyEnabled =
+        PhGetIntegerSetting(SETTING_ENABLE_CPU_FREQUENCY_MSR) &&
+        PhSystemProcessorInformation.SingleProcessorGroup &&
+        PhInitializeCpuFrequencyMsr(NumberOfProcessors);
+
     PhSipUpdateTimerResolution();
     PhSipUpdateProcessorInformation();
     PhSipUpdateProcessorFrequency();
@@ -295,6 +302,12 @@ VOID PhSipUninitializeCpuDialog(
     )
 {
     ULONG i;
+
+    if (CpuMsrFrequencyEnabled)
+    {
+        PhCleanupCpuFrequencyMsr();
+        CpuMsrFrequencyEnabled = FALSE;
+    }
 
     PhDeleteGraphState(&CpuGraphState);
 
@@ -376,6 +389,23 @@ VOID PhSipTickCpuDialog(
         PhSipUpdateProcessorPerformanceDistributionEx();
     else
         PhSipUpdateProcessorPerformanceDistribution();
+
+    if (CpuMsrFrequencyEnabled)
+    {
+        FLOAT overallMhz;
+        PFLOAT perCore = CpuFrequencyInformation;
+        FLOAT localBuffer[MAXIMUM_PROC_PER_GROUP];
+
+        // Override the kernel distribution values (truncated on Win10 hybrids) with the
+        // true per-core frequency read from APERF/MPERF via PawnIO. When the per-CPU
+        // speed display is off there is no shared array, so use a local one just for the
+        // overall average.
+        if (!perCore && NumberOfProcessors <= MAXIMUM_PROC_PER_GROUP)
+            perCore = localBuffer;
+
+        if (perCore && PhUpdateCpuFrequencyMsr(perCore, NumberOfProcessors, &overallMhz))
+            CpuCurrentFrequency = overallMhz;
+    }
     //PhGetSystemLogicalProcessorRelationInformation(&LogicalProcessorInformation);
 
     if (CpuTicked < 2)

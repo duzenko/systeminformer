@@ -1009,13 +1009,15 @@ BEGIN
     CONTROL         "Enable smooth graphs",IDC_ENABLESMOOTHGRAPHS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,227,10
     CONTROL         "Show text",IDC_SHOWTEXT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,19,49,10
-    CONTROL         "",IDC_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_DISABLED | WS_TABSTOP,7,68,236,81
+    CONTROL         "",IDC_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_DISABLED | WS_TABSTOP,7,80,236,69
     CONTROL         "Use old colors (black background)",IDC_USEOLDCOLORS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,31,123,10
     CONTROL         "Use Task Manager style (white background, solid lines)",IDC_TASKMANAGERSTYLE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,43,200,10
     CONTROL         "Show commit charge instead of physical memory in summary view",IDC_SHOWCOMMITINSUMMARY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,55,227,10
+    CONTROL         "Read true CPU frequency from MSRs via PawnIO (hybrid CPUs)",IDC_ENABLECPUFREQMSR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,67,227,10
 END
 
 IDD_PLUGINMANAGER DIALOGEX 0, 0, 501, 272
@@ -2649,6 +2651,13 @@ BEGIN
     VK_F5,          IDC_REFRESH,            VIRTKEY, NOINVERT
     VK_F11,         IDC_MAXSCREEN,          VIRTKEY, NOINVERT
 END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RCDATA
+//
+
+IDR_INTELMSR            RCDATA                  "resources\\IntelMSR.bin"
 
 
 /////////////////////////////////////////////////////////////////////////////
