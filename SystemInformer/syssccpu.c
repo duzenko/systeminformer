@@ -1227,9 +1227,12 @@ VOID PhSipUpdateCpuPanel(
     else
         PhSetWindowText(CpuPanelProcessesLabel, PhaFormatUInt64(PhTotalProcesses, TRUE)->Buffer);
 
-    PhInitFormatI64UGroupDigits(&format[0], PhTotalThreads);
+    // Threads running or waiting for a CPU, then all threads.
+    PhInitFormatU(&format[0], PhTotalRunnableThreads);
+    PhInitFormatS(&format[1], L" / ");
+    PhInitFormatI64UGroupDigits(&format[2], PhTotalThreads);
 
-    if (PhFormatToBuffer(format, 1, formatBuffer, sizeof(formatBuffer), NULL))
+    if (PhFormatToBuffer(format, 3, formatBuffer, sizeof(formatBuffer), NULL))
         PhSetWindowText(CpuPanelThreadsLabel, formatBuffer);
     else
         PhSetWindowText(CpuPanelThreadsLabel, PhaFormatUInt64(PhTotalThreads, TRUE)->Buffer);

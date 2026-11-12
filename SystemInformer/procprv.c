@@ -210,6 +210,7 @@ ULONG PhTotalProcesses = 0;
 ULONG PhTotalThreads = 0;
 ULONG PhTotalHandles = 0;
 ULONG PhTotalCpuQueueLength = 0;
+ULONG PhTotalRunnableThreads = 0; // running or waiting for a CPU
 
 UCHAR PhDpcsProcessInformationBuffer[sizeof(SYSTEM_PROCESS_INFORMATION) + sizeof(SYSTEM_PROCESS_INFORMATION_EXTENSION)] = { 0 }; // HACK (dmex)
 UCHAR PhInterruptsProcessInformationBuffer[sizeof(SYSTEM_PROCESS_INFORMATION) + sizeof(SYSTEM_PROCESS_INFORMATION_EXTENSION)] = { 0 };
@@ -2631,6 +2632,7 @@ VOID PhProcessProviderUpdate(
     PhTotalThreads = 0;
     PhTotalHandles = 0;
     PhTotalCpuQueueLength = 0;
+    PhTotalRunnableThreads = 0;
 
     if (!NT_SUCCESS(status = PhEnumProcesses(&processes)))
     {
@@ -2672,6 +2674,30 @@ VOID PhProcessProviderUpdate(
         PhTotalProcesses++;
         PhTotalThreads += process->NumberOfThreads;
         PhTotalHandles += process->HandleCount;
+
+        // The idle process's threads show as running on every idle processor.
+        if (process->UniqueProcessId != SYSTEM_IDLE_PROCESS_ID)
+        {
+            for (ULONG i = 0; i < process->NumberOfThreads; i++)
+            {
+                PSYSTEM_THREAD_INFORMATION thread = &process->Threads[i];
+
+                switch (thread->ThreadState)
+                {
+                case Running:
+                    // This thread took the snapshot, so it is always running in it.
+                    if (thread->ClientId.UniqueThread == NtCurrentThreadId())
+                        break;
+                    __fallthrough;
+                case Ready:
+                case Standby:
+                case Transition:
+                case DeferredReady:
+                    PhTotalRunnableThreads++;
+                    break;
+                }
+            }
+        }
 
         if (process->UniqueProcessId == SYSTEM_IDLE_PROCESS_ID)
         {
